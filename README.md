@@ -8,6 +8,10 @@ Este projeto é um dashboard interativo para análise de salários na área de d
 - Gráficos interativos com Plotly mostrando salários médios, distribuição salarial, tipos de trabalho e salários por país para Cientistas de Dados.
 - Filtro especial para selecionar os 20 cargos mais frequentes, facilitando a navegação.
 
+## Link para o app online
+
+[Veja o dashboard rodando no Streamlit Cloud](https://dashboard-salaries-rod-2025.streamlit.app)
+
 ## Como rodar localmente
 
 1. Clone o repositório
