@@ -8,7 +8,7 @@ st.set_page_config(
     layout="wide",
 )
 
-df = pd.read_csv("https://raw.githubusercontent.com/vqrca/dashboard_salarios_dados/refs/heads/main/dados-imersao-final.csv")
+df = pd.read_csv("dados-imersao-final.csv")
 
 anos_disponiveis = sorted(df['ano'].unique())
 anos_selecionados = st.sidebar.multiselect("Ano", anos_disponiveis, default=anos_disponiveis)
@@ -24,14 +24,22 @@ contratos_selecionados = st.sidebar.multiselect("Tipo de Contrato", contratos_di
 tamanhos_disponiveis = sorted(df['tamanho_empresa'].unique())
 tamanhos_selecionados = st.sidebar.multiselect("Tamanho da Empresa", tamanhos_disponiveis, default=tamanhos_disponiveis)
 
-# --- Filtragem do DataFrame ---
-# O dataframe principal é filtrado com base nas seleções feitas na barra lateral.
+
+cargos_disponiveis = df['cargo'].value_counts().nlargest(20).index # Utiliza os 20 cargos mais frequentes
+st.sidebar.caption(f"Mostrando os {len(cargos_disponiveis)} cargos mais frequentes")
+cargos_selecionados = st.sidebar.multiselect("Cargo", cargos_disponiveis, default=cargos_disponiveis)
+
+
+
 df_filtrado = df[
     (df['ano'].isin(anos_selecionados)) &
     (df['senioridade'].isin(senioridades_selecionadas)) &
     (df['contrato'].isin(contratos_selecionados)) &
-    (df['tamanho_empresa'].isin(tamanhos_selecionados))
+    (df['tamanho_empresa'].isin(tamanhos_selecionados)) &
+    (df['cargo'].isin(cargos_selecionados))
 ]
+
+
 
 
 st.title("🎲 Dashboard de Análise de Salários na Área de Dados")
@@ -45,9 +53,9 @@ if not df_filtrado.empty:
     total_registros = df_filtrado.shape[0]
     cargo_mais_frequente = df_filtrado["cargo"].mode()[0]
 else:
-    salario_medio, salario_mediano, salario_maximo, total_registros, cargo_mais_comum = 0, 0, 0, ""
+    salario_medio, salario_maximo, total_registros, cargo_mais_frequente = 0, 0, 0, ""
 
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4= st.columns(4)
 col1.metric("Salário médio", f"${salario_medio:,.0f}")
 col2.metric("Salário máximo", f"${salario_maximo:,.0f}")
 col3.metric("Total de registros", f"{total_registros:,}")
@@ -73,7 +81,7 @@ with col_graf1:
         grafico_cargos.update_layout(title_x=0.1, yaxis={'categoryorder':'total ascending'})
         st.plotly_chart(grafico_cargos, use_container_width=True)
     else:
-        st.warning("Nenhum dado para exibir no gráfico de cargos.")
+        st.warning("Nenhum dado para exibir no gráfico de cargos. Tente ajustar os filtros na barra lateral.")
 
 with col_graf2:
     if not df_filtrado.empty:
@@ -87,7 +95,7 @@ with col_graf2:
         grafico_hist.update_layout(title_x=0.1)
         st.plotly_chart(grafico_hist, use_container_width=True)
     else:
-        st.warning("Nenhum dado para exibir no gráfico de distribuição.")
+        st.warning("Nenhum dado para exibir no gráfico de distribuição. Tente ajustar os filtros na barra lateral.")
 
 col_graf3, col_graf4 = st.columns(2)
 
@@ -106,7 +114,7 @@ with col_graf3:
         grafico_remoto.update_layout(title_x=0.1)
         st.plotly_chart(grafico_remoto, use_container_width=True)
     else:
-        st.warning("Nenhum dado para exibir no gráfico dos tipos de trabalho.")
+        st.warning("Nenhum dado para exibir no gráfico dos tipos de trabalho. Tente ajustar os filtros na barra lateral.")
 
 with col_graf4:
     if not df_filtrado.empty:
@@ -121,7 +129,7 @@ with col_graf4:
         grafico_paises.update_layout(title_x=0.1)
         st.plotly_chart(grafico_paises, use_container_width=True)
     else:
-        st.warning("Nenhum dado para exibir no gráfico de países.") 
+        st.warning("Nenhum dado para exibir no gráfico de países. Tente ajustar os filtros na barra lateral.") 
 
 st.subheader("Dados Detalhados")
 st.dataframe(df_filtrado)
